@@ -65,6 +65,7 @@
       transition: all 0.15s;
     }
     button:hover { background: #f8fafc; border-color: #cbd5e1; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
     button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
     button.primary:hover { background: var(--primary-hover); }
     button.success { background: var(--success); color: #fff; border-color: var(--success); }
@@ -373,6 +374,7 @@ let webAppUrl = localStorage.getItem('bbc_webapp_url') || DEFAULT_WEB_APP_URL;
 let currentFolderId = null;
 let renamingFolderId = null;
 let uploadQueue = [];
+let isUploading = false;
 
 let currentZoom = 1;
 let panX = 0, panY = 0;
@@ -836,6 +838,9 @@ async function gasFetchPost(payloadObj) {
 }
 
 async function uploadAllToDrive() {
+  if (isUploading) return;
+  isUploading = true;
+
   const folder = folders.find(f => f.id === currentFolderId);
   const koTag = document.getElementById('koSelect').value;
   const btn = document.getElementById('uploadBtn');
@@ -885,6 +890,7 @@ async function uploadAllToDrive() {
     showToast(`Upload gagal: ${lastError}`);
   }
 
+  isUploading = false;
   btn.disabled = false;
   btn.textContent = `🚀 Upload ke Folder "${folder.folderName}"`;
 }
