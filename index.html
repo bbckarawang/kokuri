@@ -37,7 +37,7 @@
     }
     .brand { display: flex; align-items: center; gap: 10px; }
     .brand h1 { font-size: 18px; margin: 0; font-weight: 700; }
-    .brand span { font-size: 12px; background: #eff6ff; color: var(--primary); padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+    .brand span { font-size: 12px; background: #ecfdf5; color: #047857; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
 
     .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     input[type="text"], select {
@@ -110,7 +110,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 14px 10px;
+      padding: 16px 10px;
       border-radius: 10px;
       cursor: pointer;
       position: relative;
@@ -132,8 +132,7 @@
       background: rgba(255,255,255,0.85); color: #92400e;
       padding: 1px 5px; border-radius: 4px;
     }
-    .folder-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; word-break: break-word; }
-    .folder-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .folder-name { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.35; word-break: break-word; }
     .rename-btn {
       position: absolute; top: 6px; right: 6px; opacity: 0;
       padding: 4px 6px; font-size: 11px; background: #fff;
@@ -268,21 +267,21 @@
 <header>
   <div class="brand">
     <h1>📁 Kokurikuler BBC Karawang 2026</h1>
-    <span id="syncStatus">Data Lokal Siap</span>
+    <span id="syncStatus">Terhubung ke Drive</span>
   </div>
   <div class="toolbar">
     <input type="text" id="searchInput" placeholder="Cari guru / kelas (mis. Mr. Danu)..." oninput="renderFolders()" />
     <select id="teacherFilter" onchange="renderFolders()">
       <option value="">Semua Teacher</option>
     </select>
-    <button id="btnSettings" onclick="openSettingsModal()">⚙️ Koneksi Drive</button>
+    <button id="btnSettings" onclick="openSettingsModal()">⚙️ URL Script</button>
     <button class="primary" onclick="syncFromSheets()">🔄 Sync Sheets</button>
   </div>
 </header>
 
 <div class="breadcrumb-bar">
   <div class="breadcrumb" id="breadcrumb">
-    <span class="link" onclick="goHome()">🏠 Folder Utama (Drive ID: 1U-aylj...gcwB)</span>
+    <span class="link" onclick="goHome()">🏠 Folder Utama</span>
   </div>
   <div style="font-size: 12px; color: var(--muted);">
     Klik folder untuk melihat jadwal, preview media & upload foto/video
@@ -307,10 +306,9 @@
 <!-- Modal Pengaturan Web App URL -->
 <div class="modal-backdrop" id="settingsModal">
   <div class="modal">
-    <h3>⚙️ Pengaturan Google Drive & Sheets</h3>
+    <h3>⚙️ Pengaturan URL Google Apps Script</h3>
     <p style="font-size:12px; color:var(--muted); line-height:1.5;">
-      Folder Drive Tujuan: <b>1U-aylj7t4Jz_fFLUqphqGXr_NvTrgcwB</b><br/>
-      Jika dibuka sebagai file HTML lokal, tempel URL Web App Apps Script di bawah ini:
+      Folder Drive Tujuan: <b>1U-aylj7t4Jz_fFLUqphqGXr_NvTrgcwB</b>
     </p>
     <input type="text" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/...../exec" />
     <div class="modal-actions">
@@ -341,6 +339,8 @@
 <div class="status-toast" id="toast"></div>
 
 <script>
+const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxB-TOUZDDkrdLd2jsjBmdQ92s3uZAbWnjpcC7Y0YhzSLHuEsinubhwgALEk1RyyqS_/exec';
+
 const DEFAULT_FOLDERS = [
   {"id":"T101","folderName":"Mr. Danu - BS1","teacher":"Mr. Danu","kelas":"BS1","kodeKelas":"K11","keterangan":"Kelompok R (New Class)","activities":[{"ko":"KO1","tanggal":"2026-08-21","materi":"Role Play"},{"ko":"KO2","tanggal":"2026-09-22","materi":"Role Play"},{"ko":"KO3","tanggal":"2026-10-23","materi":"Role Play"}]},
   {"id":"T10","folderName":"Mr. Danu - DCT3","teacher":"Mr. Danu","kelas":"DCT3","kodeKelas":"K02","keterangan":"Kelompok R lanjutan PE2","activities":[{"ko":"KO1","tanggal":"2026-08-24","materi":"Debate"},{"ko":"KO2","tanggal":"2026-09-21","materi":"Debate"},{"ko":"KO3","tanggal":"2026-10-22","materi":"Debate"}]},
@@ -372,16 +372,14 @@ const DEFAULT_FOLDERS = [
   {"id":"T052b","folderName":"Ms. Syifa - PC6A","teacher":"Ms. Syifa","kelas":"PC6A","kodeKelas":"K07","keterangan":"Kelompok A lanjutan DCC2","activities":[{"ko":"KO1","tanggal":"2026-09-18","materi":"MC"},{"ko":"KO2","tanggal":"2026-10-16","materi":"Speech"},{"ko":"KO3","tanggal":"2026-11-20","materi":"Speech"},{"ko":"KO4","tanggal":"2026-12-15","materi":"Debate"},{"ko":"KO5","tanggal":"2026-12-18","materi":"Debate"}]}
 ];
 
-// Deteksi otomatis apakah berjalan di dalam Google Apps Script atau Standalone HTML
 const IS_GAS_ENV = (typeof google !== 'undefined' && google.script && google.script.run);
 
 let folders = JSON.parse(localStorage.getItem('bbc_cocur_folders')) || DEFAULT_FOLDERS;
-let webAppUrl = localStorage.getItem('bbc_webapp_url') || '';
+let webAppUrl = localStorage.getItem('bbc_webapp_url') || DEFAULT_WEB_APP_URL;
 let currentFolderId = null;
 let renamingFolderId = null;
 let uploadQueue = [];
 
-// State Lightbox Zoom & Pan
 let currentZoom = 1;
 let panX = 0, panY = 0;
 let isDragging = false, startX = 0, startY = 0;
@@ -393,7 +391,7 @@ function init() {
     document.getElementById('syncStatus').textContent = 'Terhubung Langsung (Apps Script)';
     document.getElementById('btnSettings').style.display = 'none';
     syncFromSheets();
-  } else if (webAppUrl) {
+  } else {
     document.getElementById('syncStatus').textContent = 'Terhubung ke Drive';
   }
 }
@@ -402,7 +400,7 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 3500);
+  setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
 
 function populateTeacherFilter() {
@@ -420,7 +418,7 @@ function populateTeacherFilter() {
 function goHome() {
   currentFolderId = null;
   uploadQueue = [];
-  document.getElementById('breadcrumb').innerHTML = `<span class="link" onclick="goHome()">🏠 Folder Utama (Drive ID: 1U-aylj...gcwB)</span>`;
+  document.getElementById('breadcrumb').innerHTML = `<span class="link" onclick="goHome()">🏠 Folder Utama</span>`;
   renderFolders();
 }
 
@@ -431,7 +429,7 @@ function renderFolders() {
 
   const filtered = folders
     .filter(f => (!teacherFilter || f.teacher === teacherFilter))
-    .filter(f => f.folderName.toLowerCase().includes(query) || f.id.toLowerCase().includes(query))
+    .filter(f => f.folderName.toLowerCase().includes(query) || f.kelas.toLowerCase().includes(query))
     .sort((a, b) => a.folderName.localeCompare(b.folderName));
 
   const container = document.getElementById('appContainer');
@@ -452,7 +450,6 @@ function renderFolders() {
           </div>
         </div>
         <div class="folder-name">${f.folderName}</div>
-        <div class="folder-sub">ID: ${f.id} • ${f.kodeKelas}</div>
       </div>
     `;
   });
@@ -493,7 +490,7 @@ function openFolder(id) {
           <button onclick="openRenameModal('${folder.id}')">✏️ Rename Folder</button>
         </h2>
         <p style="font-size:12px; color:var(--muted); margin-top:-6px;">
-          ID Jadwal: <b>${folder.id}</b> | Kode Kelas: <b>${folder.kodeKelas}</b> | ${folder.keterangan}
+          ${folder.keterangan}
         </p>
         <table>
           <thead>
@@ -513,7 +510,7 @@ function openFolder(id) {
           </h2>
           <div id="driveFilesArea" class="file-grid">
             <div style="grid-column:1/-1; font-size:12px; color:var(--muted);">
-              ${(IS_GAS_ENV || webAppUrl) ? 'Memuat daftar file dari Google Drive...' : 'Hubungkan URL Google Apps Script di menu ⚙️ untuk melihat & menyimpan file ke Drive.'}
+              Memuat daftar file dari Google Drive...
             </div>
           </div>
         </div>
@@ -557,7 +554,7 @@ function openFolder(id) {
   `;
 
   setupDragDrop();
-  if (IS_GAS_ENV || webAppUrl) loadDriveFiles(folder.folderName);
+  loadDriveFiles(folder.folderName);
 }
 
 function setupDragDrop() {
@@ -818,15 +815,41 @@ function previewQueueItem(idx) {
 }
 
 // ==========================================
-// KOMUNIKASI BACKEND (GAS NATIVE ATAU FETCH)
+// KOMUNIKASI BACKEND (CORS-SAFE FETCH & GAS)
 // ==========================================
-async function uploadAllToDrive() {
-  if (!IS_GAS_ENV && !webAppUrl) {
-    openSettingsModal();
-    showToast('Masukkan URL Google Apps Script terlebih dahulu!');
-    return;
+async function gasFetchGet(paramsObj) {
+  const url = new URL(webAppUrl);
+  Object.keys(paramsObj).forEach(k => url.searchParams.set(k, paramsObj[k]));
+  const resp = await fetch(url.toString(), {
+    method: 'GET',
+    redirect: 'follow'
+  });
+  const text = await resp.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error('Respon server bukan JSON. Pastikan Deployment Apps Script versi terbaru sudah di-Deploy dengan akses "Anyone".');
   }
+}
 
+async function gasFetchPost(payloadObj) {
+  const resp = await fetch(webAppUrl, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify(payloadObj)
+  });
+  const text = await resp.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error('Gagal memproses respon upload. Periksa izin DriveApp di Apps Script.');
+  }
+}
+
+async function uploadAllToDrive() {
   const folder = folders.find(f => f.id === currentFolderId);
   const koTag = document.getElementById('koSelect').value;
   const btn = document.getElementById('uploadBtn');
@@ -834,6 +857,8 @@ async function uploadAllToDrive() {
   btn.textContent = '⏳ Mengunggah ke Drive...';
 
   let successCount = 0;
+  let lastError = '';
+
   for (const item of uploadQueue) {
     try {
       if (IS_GAS_ENV) {
@@ -844,36 +869,43 @@ async function uploadAllToDrive() {
             .uploadToDrive(folder.folderName, koTag, item.name, item.mimeType, item.base64);
         });
       } else {
-        const resp = await fetch(webAppUrl, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'upload',
-            folderName: folder.folderName,
-            koTag: koTag,
-            fileName: item.name,
-            mimeType: item.mimeType,
-            base64Data: item.base64
-          })
+        const res = await gasFetchPost({
+          action: 'upload',
+          folderName: folder.folderName,
+          koTag: koTag,
+          fileName: item.name,
+          mimeType: item.mimeType,
+          base64Data: item.base64
         });
-        const res = await resp.json();
-        if (res.status === 'success') successCount++;
+        if (res.status === 'success') {
+          successCount++;
+        } else {
+          lastError = res.message || 'Unknown error';
+        }
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+      lastError = e.message;
+    }
   }
 
-  showToast(`Berhasil mengunggah ${successCount} dari ${uploadQueue.length} file ke Drive!`);
-  uploadQueue = [];
-  document.getElementById('queueList').innerHTML = '';
-  btn.style.display = 'none';
+  if (successCount > 0) {
+    showToast(`Berhasil mengunggah ${successCount} dari ${uploadQueue.length} file ke Drive!`);
+    uploadQueue = [];
+    document.getElementById('queueList').innerHTML = '';
+    btn.style.display = 'none';
+    loadDriveFiles(folder.folderName);
+  } else {
+    showToast(`Upload gagal: ${lastError}`);
+  }
+
   btn.disabled = false;
   btn.textContent = `🚀 Upload ke Folder "${folder.folderName}"`;
-  loadDriveFiles(folder.folderName);
 }
 
 let currentDriveFiles = [];
 
 async function loadDriveFiles(folderName) {
-  if (!IS_GAS_ENV && !webAppUrl) return;
   const area = document.getElementById('driveFilesArea');
   area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--muted);">⏳ Mengambil isi folder dari Google Drive...</div>`;
 
@@ -884,13 +916,12 @@ async function loadDriveFiles(folderName) {
         google.script.run.withSuccessHandler(res).withFailureHandler(rej).listDriveFiles(folderName);
       });
     } else {
-      const resp = await fetch(`${webAppUrl}?action=listFiles&folderName=${encodeURIComponent(folderName)}`);
-      data = await resp.json();
+      data = await gasFetchGet({ action: 'listFiles', folderName: folderName });
     }
 
     currentDriveFiles = data.files || [];
     if (currentDriveFiles.length === 0) {
-      area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--muted);">Folder ini masih kosong di Google Drive.</div>`;
+      area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--muted);">Folder ini masih kosong di Google Drive. Silakan upload foto/video di sebelah kanan.</div>`;
       return;
     }
 
@@ -908,7 +939,7 @@ async function loadDriveFiles(folderName) {
       `;
     }).join('');
   } catch (e) {
-    area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--danger);">Gagal memuat file Drive.</div>`;
+    area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--danger);">Gagal memuat file Drive: ${e.message}</div>`;
   }
 }
 
@@ -925,11 +956,6 @@ function previewDriveFile(idx) {
 }
 
 async function syncFromSheets() {
-  if (!IS_GAS_ENV && !webAppUrl) {
-    openSettingsModal();
-    showToast('Masukkan URL Apps Script untuk sinkronisasi dengan Google Sheets.');
-    return;
-  }
   showToast('Menyinkronkan data dari Google Sheets...');
   try {
     let data;
@@ -938,8 +964,7 @@ async function syncFromSheets() {
         google.script.run.withSuccessHandler(res).withFailureHandler(rej).getCoCurricularFoldersData();
       });
     } else {
-      const resp = await fetch(`${webAppUrl}?action=getData`);
-      data = await resp.json();
+      data = await gasFetchGet({ action: 'getData' });
     }
 
     if (data.status === 'success' && data.folders.length > 0) {
@@ -951,7 +976,7 @@ async function syncFromSheets() {
       showToast('Data berhasil disinkronkan dari Google Sheets!');
     }
   } catch (e) {
-    showToast('Gagal sinkronisasi data.');
+    showToast(`Gagal sinkronisasi: ${e.message}`);
   }
 }
 
@@ -980,11 +1005,8 @@ async function confirmRename() {
   if (oldName !== newName) {
     if (IS_GAS_ENV) {
       google.script.run.renameDriveFolder(oldName, newName);
-    } else if (webAppUrl) {
-      fetch(webAppUrl, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'renameFolder', oldName, newName })
-      }).catch(() => {});
+    } else {
+      gasFetchPost({ action: 'renameFolder', oldName, newName }).catch(() => {});
     }
   }
   showToast(`Nama folder diubah menjadi "${newName}"`);
@@ -998,9 +1020,9 @@ function openSettingsModal() {
 function saveSettings() {
   webAppUrl = document.getElementById('webAppUrlInput').value.trim();
   localStorage.setItem('bbc_webapp_url', webAppUrl);
-  document.getElementById('syncStatus').textContent = webAppUrl ? 'Terhubung ke Drive' : 'Data Lokal Siap';
+  document.getElementById('syncStatus').textContent = 'Terhubung ke Drive';
   closeModal('settingsModal');
-  showToast('Pengaturan koneksi berhasil disimpan!');
+  showToast('URL Apps Script berhasil diperbarui!');
 }
 
 init();
