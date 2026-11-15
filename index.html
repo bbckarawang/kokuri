@@ -69,6 +69,8 @@
     button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
     button.primary:hover { background: var(--primary-hover); }
     button.success { background: var(--success); color: #fff; border-color: var(--success); }
+    button.guide-btn { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+    button.guide-btn:hover { background: #fde68a; }
 
     .breadcrumb-bar {
       max-width: 1280px;
@@ -149,7 +151,7 @@
       border-radius: 12px;
       padding: 20px;
     }
-    .card h2 { font-size: 16px; margin: 0 0 14px; display: flex; align-items: center; justify-content: space-between; }
+    .card h2 { font-size: 16px; margin: 0 0 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
@@ -158,6 +160,22 @@
       background: #dbeafe; color: #1e40af; font-weight: 700;
       padding: 3px 8px; border-radius: 6px; font-size: 12px;
     }
+
+    /* Panduan & Plot KO Styles */
+    .guide-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; }
+    .guide-tab { padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; background: #f1f5f9; color: var(--muted); border: 1px solid transparent; }
+    .guide-tab.active { background: var(--primary); color: #fff; }
+    .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+    .chart-table th, .chart-table td { text-align: center; border: 1px solid var(--border); padding: 8px 10px; white-space: nowrap; }
+    .chart-table td:first-child { text-align: left; font-weight: 700; background: #f8fafc; position: sticky; left: 0; z-index: 2; }
+    .cell-ko { background: #dcfce7; color: #166534; font-weight: 800; }
+    .cell-skp { background: #dbeafe; color: #1e40af; font-weight: 800; }
+    .cell-mid-end { background: #fee2e2; color: #991b1b; font-weight: 800; }
+    .cell-val { background: #fef9c3; color: #854d0e; font-weight: 700; }
+    .plot-rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .rule-box { background: #f8fafc; border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 12px 14px; border-radius: 8px; font-size: 13px; }
+    .rule-box.green { border-left-color: #10b981; }
+    .rule-box.gray { border-left-color: #64748b; }
 
     .dropzone {
       border: 2px dashed #93c5fd; background: #f8fafc; border-radius: 10px;
@@ -184,7 +202,6 @@
     }
     .size-badge { font-weight: 700; color: var(--success); }
 
-    /* ANIMASI UPLOAD FOTO & VIDEO (PROGRESS BAR 0% - 100%) */
     .upload-progress-card {
       margin-top: 14px;
       border-radius: 12px;
@@ -365,7 +382,7 @@
     <select id="teacherFilter" onchange="renderFolders()">
       <option value="">Semua Teacher</option>
     </select>
-    <button id="btnSettings" onclick="openSettingsModal()">⚙️ URL Script</button>
+    <button class="guide-btn" onclick="openPanduanView()">📘 Panduan &amp; Plot KO</button>
     <button class="primary" onclick="syncFromSheets()">🔄 Sync Sheets</button>
   </div>
 </header>
@@ -394,21 +411,6 @@
   </div>
 </div>
 
-<!-- Modal Pengaturan Web App URL -->
-<div class="modal-backdrop" id="settingsModal">
-  <div class="modal">
-    <h3>⚙️ Pengaturan URL Google Apps Script</h3>
-    <p style="font-size:12px; color:var(--muted); line-height:1.5;">
-      Folder Drive Tujuan: <b>1U-aylj7t4Jz_fFLUqphqGXr_NvTrgcwB</b>
-    </p>
-    <input type="text" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/...../exec" />
-    <div class="modal-actions">
-      <button onclick="closeModal('settingsModal')">Tutup</button>
-      <button class="primary" onclick="saveSettings()">Simpan Koneksi</button>
-    </div>
-  </div>
-</div>
-
 <!-- Lightbox Preview & Zoom Modal -->
 <div class="lightbox-backdrop" id="lightboxModal">
   <div class="lightbox-header">
@@ -430,7 +432,7 @@
 <div class="status-toast" id="toast"></div>
 
 <script>
-const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxB-TOUZDDkrdLd2jsjBmdQ92s3uZAbWnjpcC7Y0YhzSLHuEsinubhwgALEk1RyyqS_/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxB-TOUZDDkrdLd2jsjBmdQ92s3uZAbWnjpcC7Y0YhzSLHuEsinubhwgALEk1RyyqS_/exec';
 
 const DEFAULT_FOLDERS = [
   {"id":"T101","folderName":"Mr. Danu - BS1","teacher":"Mr. Danu","kelas":"BS1","kodeKelas":"K11","keterangan":"Kelompok R (New Class)","activities":[{"ko":"KO1","tanggal":"2026-08-21","materi":"Role Play"},{"ko":"KO2","tanggal":"2026-09-22","materi":"Role Play"},{"ko":"KO3","tanggal":"2026-10-23","materi":"Role Play"}]},
@@ -466,11 +468,12 @@ const DEFAULT_FOLDERS = [
 const IS_GAS_ENV = (typeof google !== 'undefined' && google.script && google.script.run);
 
 let folders = JSON.parse(localStorage.getItem('bbc_cocur_folders')) || DEFAULT_FOLDERS;
-let webAppUrl = localStorage.getItem('bbc_webapp_url') || DEFAULT_WEB_APP_URL;
+let currentView = 'folders'; // 'folders' | 'detail' | 'panduan'
 let currentFolderId = null;
 let renamingFolderId = null;
 let uploadQueue = [];
 let isUploading = false;
+let panduanCache = null;
 
 let currentZoom = 1;
 let panX = 0, panY = 0;
@@ -479,12 +482,9 @@ let isDragging = false, startX = 0, startY = 0;
 function init() {
   populateTeacherFilter();
   renderFolders();
-  if (IS_GAS_ENV) {
-    document.getElementById('syncStatus').textContent = 'Terhubung Langsung (Apps Script)';
-    document.getElementById('btnSettings').style.display = 'none';
-  } else {
-    document.getElementById('syncStatus').textContent = 'Terhubung ke Drive (Mendukung Video 200MB+)';
-  }
+  document.getElementById('syncStatus').textContent = IS_GAS_ENV
+    ? 'Terhubung Langsung (Apps Script)'
+    : 'Terhubung ke Drive (Video 200MB+)';
   syncFromSheets(true);
 }
 
@@ -492,7 +492,7 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 5500);
+  setTimeout(() => { t.style.display = 'none'; }, 6000);
 }
 
 function populateTeacherFilter() {
@@ -510,6 +510,7 @@ function populateTeacherFilter() {
 }
 
 function goHome() {
+  currentView = 'folders';
   currentFolderId = null;
   uploadQueue = [];
   document.getElementById('breadcrumb').innerHTML = `<span class="link" onclick="goHome()">🏠 Folder Utama</span>`;
@@ -517,7 +518,11 @@ function goHome() {
 }
 
 function renderFolders() {
-  if (currentFolderId) return;
+  if (currentView !== 'folders') {
+    currentView = 'folders';
+    currentFolderId = null;
+    document.getElementById('breadcrumb').innerHTML = `<span class="link" onclick="goHome()">🏠 Folder Utama</span>`;
+  }
   const query = document.getElementById('searchInput').value.toLowerCase();
   const teacherFilter = document.getElementById('teacherFilter').value;
 
@@ -551,7 +556,136 @@ function renderFolders() {
   container.innerHTML = html;
 }
 
+/* =========================================================================
+   MENU PANDUAN & PLOT KOKURIKULER (READ-ONLY DARI SPREADSHEET)
+   ========================================================================= */
+async function openPanduanView() {
+  currentView = 'panduan';
+  currentFolderId = null;
+  document.getElementById('breadcrumb').innerHTML = `
+    <span class="link" onclick="goHome()">🏠 Folder Utama</span>
+    <span>/</span>
+    <b>📘 Panduan &amp; Plot Co-Curricular (Read-Only)</b>
+  `;
+
+  const container = document.getElementById('appContainer');
+  container.innerHTML = `
+    <div class="card">
+      <h2>
+        <span>📘 Panduan Co-Curricular Speaking Activities (Read-Only)</span>
+        <button onclick="goHome()">⬅️ Kembali ke Folder</button>
+      </h2>
+      <div class="guide-tabs">
+        <button class="guide-tab active" id="tabChartBtn" onclick="switchGuideTab('chart')">📊 Co-Curricular Speaking Chart</button>
+        <button class="guide-tab" id="tabPlotBtn" onclick="switchGuideTab('plot')">🗓️ Plot Pertemuan Kelas (24 / 32 / 10 Pertemuan)</button>
+      </div>
+      <div id="panduanBody">
+        <div style="padding:30px; text-align:center; color:var(--muted);">⏳ Memuat data panduan resmi dari Google Sheets...</div>
+      </div>
+    </div>
+  `;
+
+  if (!panduanCache) {
+    try {
+      let res;
+      if (IS_GAS_ENV) {
+        res = await new Promise((resolve, reject) => {
+          google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getPanduanKokurikulerData();
+        });
+      } else {
+        res = await gasFetchGet({ action: 'getPanduan' });
+      }
+      if (res.status === 'success') {
+        panduanCache = res;
+      } else {
+        document.getElementById('panduanBody').innerHTML = `<div style="color:var(--danger); padding:16px;">${res.message}</div>`;
+        return;
+      }
+    } catch (e) {
+      document.getElementById('panduanBody').innerHTML = `<div style="color:var(--danger); padding:16px;">Gagal memuat panduan: ${e.message}</div>`;
+      return;
+    }
+  }
+
+  switchGuideTab('chart');
+}
+
+function switchGuideTab(tabName) {
+  document.getElementById('tabChartBtn').classList.toggle('active', tabName === 'chart');
+  document.getElementById('tabPlotBtn').classList.toggle('active', tabName === 'plot');
+  const body = document.getElementById('panduanBody');
+
+  if (tabName === 'chart') {
+    const rows = (panduanCache && panduanCache.chart) || [];
+    if (rows.length === 0) {
+      body.innerHTML = `<p style="color:var(--muted);">Data Co-Curricular Speaking Chart kosong.</p>`;
+      return;
+    }
+    let html = `<p style="font-size:13px; color:var(--muted); margin-top:0;">Panduan jenis aktivitas <b>Co-Curricular Speaking</b> per level kelas (mode hanya baca / read-only):</p>`;
+    html += `<div class="table-scroll"><table class="chart-table"><tbody>`;
+    rows.forEach((r, rIdx) => {
+      if (r.every(cell => !cell.trim())) return;
+      html += `<tr>`;
+      r.forEach((cell, cIdx) => {
+        const val = cell.trim();
+        let cls = '';
+        if (/^\d+$/.test(val)) cls = 'cell-val';
+        if (rIdx <= 3) {
+          html += `<th style="background:#fef3c7; color:#78350f; text-align:center;">${val}</th>`;
+        } else {
+          html += `<td class="${cls}">${val}</td>`;
+        }
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+    body.innerHTML = html;
+  } else {
+    const rows = (panduanCache && panduanCache.plot) || [];
+    let html = `
+      <div class="plot-rules-grid">
+        <div class="rule-box">
+          <b>📘 Program 24 Pertemuan</b><br/>
+          Pelaksanaan KO dijadwalkan pada pertemuan ke-<b>4, 13, 21, dan 22</b> (SKP: pert. 5 &amp; 23 | MID: pert. 12 | END: pert. 24).
+        </div>
+        <div class="rule-box green">
+          <b>📗 Program 32 Pertemuan</b><br/>
+          Pelaksanaan KO dijadwalkan pada pertemuan ke-<b>4, 12, 22, 30, dan 31</b> (SKP: pert. 5 &amp; 31 | MID: pert. 16 | END: pert. 32).
+        </div>
+        <div class="rule-box gray">
+          <b>📙 Program 10 Pertemuan</b><br/>
+          <b>Tidak ada kegiatan KO</b> (hanya MID di pert. 5, SKP di pert. 9, dan END di pert. 10).
+        </div>
+      </div>
+    `;
+
+    if (rows.length > 0) {
+      html += `<div class="table-scroll"><table class="chart-table"><tbody>`;
+      rows.forEach(r => {
+        if (r.every(cell => !cell.trim())) return;
+        html += `<tr>`;
+        r.forEach(cell => {
+          const val = cell.trim();
+          let cls = '';
+          if (val === 'KO') cls = 'cell-ko';
+          else if (val === 'SKP') cls = 'cell-skp';
+          else if (val === 'MID' || val === 'END') cls = 'cell-mid-end';
+          else if (/^\d+$/.test(val)) cls = 'cell-val';
+          html += `<td class="${cls}">${val}</td>`;
+        });
+        html += `</tr>`;
+      });
+      html += `</tbody></table></div>`;
+    }
+    body.innerHTML = html;
+  }
+}
+
+/* =========================================================================
+   DETAIL FOLDER & UPLOAD
+   ========================================================================= */
 function openFolder(id) {
+  currentView = 'detail';
   currentFolderId = id;
   uploadQueue = [];
   const folder = folders.find(f => f.id === id);
@@ -639,7 +773,6 @@ function openFolder(id) {
 
         <div class="queue-list" id="queueList"></div>
 
-        <!-- Animasi Upload Progress Card -->
         <div class="upload-progress-card" id="uploadProgressCard">
           <div class="up-header">
             <div class="up-title-group">
@@ -846,7 +979,6 @@ async function handleFiles(fileList) {
     if (file.type.startsWith('image/') && doImg) {
       processed = await compressImageToTarget(file, 200);
     } else if (file.size > FIFTEEN_MB) {
-      // Untuk file besar (> 15 MB hingga 200 MB+), jangan ubah ke Base64 di memori agar browser tidak crash!
       processed = {
         name: file.name,
         mimeType: file.type || 'video/mp4',
@@ -894,7 +1026,7 @@ function previewQueueItem(idx) {
 }
 
 async function gasFetchGet(paramsObj) {
-  const url = new URL(webAppUrl);
+  const url = new URL(WEB_APP_URL);
   Object.keys(paramsObj).forEach(k => url.searchParams.set(k, paramsObj[k]));
   url.searchParams.set('_t', Date.now());
   const resp = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
@@ -907,7 +1039,7 @@ async function gasFetchGet(paramsObj) {
 }
 
 async function gasFetchPost(payloadObj) {
-  const resp = await fetch(webAppUrl, {
+  const resp = await fetch(WEB_APP_URL, {
     method: 'POST',
     redirect: 'follow',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -921,10 +1053,6 @@ async function gasFetchPost(payloadObj) {
   }
 }
 
-/**
- * Mengunggah file besar (15 MB - 200 MB+) langsung ke Google Drive API per potongan 4 MB (Chunked)
- * tanpa melewati batas payload 50 MB Apps Script.
- */
 async function uploadLargeFileChunked(item, folderName, koTag, onProgress) {
   const file = item.rawFile;
   const session = await gasFetchPost({
@@ -942,7 +1070,7 @@ async function uploadLargeFileChunked(item, folderName, koTag, onProgress) {
   }
 
   const uploadUrl = session.uploadUrl;
-  const CHUNK_SIZE = 4 * 1024 * 1024; // 4 MB per potongan (kelipatan 256 KB wajib Google Drive API)
+  const CHUNK_SIZE = 4 * 1024 * 1024;
   let start = 0;
   let uploadedFileId = null;
 
@@ -958,8 +1086,6 @@ async function uploadLargeFileChunked(item, folderName, koTag, onProgress) {
       body: chunk
     });
 
-    // Status 308 = Resume Incomplete (potongan diterima, lanjut potongan berikutnya)
-    // Status 200 atau 201 = Selesai seluruhnya
     if (resp.status === 308) {
       start = end;
       const pct = Math.min(98, Math.round((start / file.size) * 100));
@@ -1034,7 +1160,6 @@ async function uploadAllToDrive() {
     const mode = isVideo ? 'video' : 'photo';
 
     if (item.isLargeChunked) {
-      // Jalur Resumable Chunked Upload (untuk video 15 MB - 200 MB+)
       try {
         updateUploadAnimation({
           mode: 'video',
@@ -1061,7 +1186,6 @@ async function uploadAllToDrive() {
         lastError = e.message;
       }
     } else {
-      // Jalur Standar (Foto & Video kecil <= 15 MB)
       const basePct = Math.round((i / total) * 100);
       const targetPct = Math.round(((i + 0.85) / total) * 100);
       let simPct = basePct;
@@ -1125,7 +1249,7 @@ async function uploadAllToDrive() {
       percent: 100,
       title: 'Presentasi Sukses 100%!',
       fileName: `${successCount} berkas berhasil tersimpan di "${folder.folderName}"`,
-      subText: 'Semua dokumentasi siap dipratinjau di daftar File Tersimpan di Drive.'
+      subText: 'Catatan: Video besar perlu 1–3 menit diproses Google Drive sebelum bisa diputar langsung.'
     });
 
     showToast(`Berhasil mengunggah ${successCount} dari ${total} file ke Drive!`);
@@ -1137,7 +1261,7 @@ async function uploadAllToDrive() {
     setTimeout(() => {
       const card = document.getElementById('uploadProgressCard');
       if (card) card.style.display = 'none';
-    }, 4500);
+    }, 5500);
   } else {
     document.getElementById('uploadProgressCard').style.display = 'none';
     showToast(`Upload gagal: ${lastError}`);
@@ -1220,8 +1344,8 @@ async function syncFromSheets(silent = false) {
       folders = data.folders;
       localStorage.setItem('bbc_cocur_folders', JSON.stringify(folders));
       populateTeacherFilter();
-      if (currentFolderId) openFolder(currentFolderId);
-      else renderFolders();
+      if (currentView === 'detail' && currentFolderId) openFolder(currentFolderId);
+      else if (currentView === 'folders') renderFolders();
       if (!silent) showToast('Data berhasil disinkronkan dari Google Sheets!');
     }
   } catch (e) {
@@ -1259,19 +1383,6 @@ async function confirmRename() {
     }
   }
   showToast(`Nama folder diubah menjadi "${newName}"`);
-}
-
-function openSettingsModal() {
-  document.getElementById('webAppUrlInput').value = webAppUrl;
-  document.getElementById('settingsModal').style.display = 'flex';
-}
-
-function saveSettings() {
-  webAppUrl = document.getElementById('webAppUrlInput').value.trim();
-  localStorage.setItem('bbc_webapp_url', webAppUrl);
-  document.getElementById('syncStatus').textContent = 'Terhubung ke Drive';
-  closeModal('settingsModal');
-  showToast('URL Apps Script berhasil diperbarui!');
 }
 
 init();
