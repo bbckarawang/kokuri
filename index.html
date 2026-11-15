@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Dokumentasi Kokurikuler - BBC Karawang 2026</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --folder-top: #f59e0b;
+      --folder-body: #fbbf24;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand h1 { font-size: 18px; margin: 0; font-weight: 700; }
+    .brand span { font-size: 12px; background: #eff6ff; color: var(--primary); padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    input[type="text"], select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+      outline: none;
+    }
+    input[type="text"]:focus, select:focus { border-color: var(--primary); }
+
+    button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    button:hover { background: #f8fafc; border-color: #cbd5e1; }
+    button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    button.primary:hover { background: var(--primary-hover); }
+    button.success { background: var(--success); color: #fff; border-color: var(--success); }
+
+    .breadcrumb-bar {
+      max-width: 1280px;
+      margin: 16px auto 0;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      background: var(--surface);
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .breadcrumb span.link { color: var(--primary); cursor: pointer; font-weight: 600; }
+    .breadcrumb span.link:hover { text-decoration: underline; }
+
+    main { max-width: 1280px; margin: 16px auto 48px; padding: 0 24px; }
+
+    /* Folder Grid */
+    .folder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 18px;
+      background: var(--surface);
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .folder-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 14px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s, transform 0.1s;
+      border: 1px solid transparent;
+    }
+    .folder-item:hover { background: #eff6ff; border-color: #bfdbfe; }
+    .folder-icon { width: 78px; height: 62px; position: relative; margin-bottom: 10px; }
+    .folder-tab { width: 32px; height: 10px; background: var(--folder-top); border-radius: 4px 4px 0 0; }
+    .folder-body {
+      width: 78px; height: 52px;
+      background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 100%);
+      border-radius: 0 6px 6px 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      display: flex; align-items: flex-end; justify-content: flex-end; padding: 6px;
+    }
+    .folder-badge {
+      font-size: 10px; font-weight: 700;
+      background: rgba(255,255,255,0.85); color: #92400e;
+      padding: 1px 5px; border-radius: 4px;
+    }
+    .folder-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; word-break: break-word; }
+    .folder-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .rename-btn {
+      position: absolute; top: 6px; right: 6px; opacity: 0;
+      padding: 4px 6px; font-size: 11px; background: #fff;
+      border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .folder-item:hover .rename-btn { opacity: 1; }
+
+    /* Detail Layout */
+    .detail-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .detail-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card h2 { font-size: 16px; margin: 0 0 14px; display: flex; align-items: center; justify-content: space-between; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; font-weight: 600; color: var(--muted); }
+    .ko-pill {
+      background: #dbeafe; color: #1e40af; font-weight: 700;
+      padding: 3px 8px; border-radius: 6px; font-size: 12px;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed #93c5fd; background: #f8fafc; border-radius: 10px;
+      padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; margin-top: 12px;
+    }
+    .dropzone:hover, .dropzone.dragover { background: #eff6ff; border-color: var(--primary); }
+    .dropzone p { margin: 6px 0; font-size: 13px; color: var(--muted); }
+
+    .compress-options {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;
+      background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 12px;
+    }
+    .compress-options label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; }
+
+    .queue-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .queue-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 12px; background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 12px;
+    }
+    .queue-thumb {
+      width: 48px; height: 48px; object-fit: cover; border-radius: 6px;
+      cursor: pointer; border: 1px solid var(--border); background: #000;
+    }
+    .size-badge { font-weight: 700; color: var(--success); }
+
+    /* Drive Files Grid */
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .file-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+      background: #fafafa;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .file-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-color: #93c5fd; }
+    .file-thumb {
+      width: 100%; height: 95px; object-fit: cover; border-radius: 6px; background: #e2e8f0;
+      display: flex; align-items: center; justify-content: center; font-size: 32px;
+    }
+    .file-title {
+      color: var(--text); font-weight: 600; display: block; margin-top: 6px;
+      word-break: break-word; line-height: 1.3;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+      display: none; align-items: center; justify-content: center; z-index: 50;
+    }
+    .modal {
+      background: #fff; padding: 22px; border-radius: 12px; width: 92%; max-width: 440px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .modal h3 { margin: 0 0 10px; font-size: 16px; }
+    .modal input { width: 100%; margin: 8px 0 14px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* Lightbox Preview & Zoom Modal */
+    .lightbox-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.92);
+      display: none; flex-direction: column; z-index: 100;
+    }
+    .lightbox-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 20px; color: #fff; background: rgba(0,0,0,0.5); z-index: 102;
+    }
+    .lightbox-controls { display: flex; gap: 8px; align-items: center; }
+    .lightbox-controls button {
+      background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);
+    }
+    .lightbox-controls button:hover { background: rgba(255,255,255,0.3); }
+    .lightbox-stage {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative; cursor: grab;
+    }
+    .lightbox-stage:active { cursor: grabbing; }
+    .lightbox-stage img {
+      max-width: 90vw; max-height: 82vh;
+      transition: transform 0.1s ease-out;
+      user-select: none; -webkit-user-drag: none;
+    }
+    .lightbox-stage iframe, .lightbox-stage video {
+      width: 85vw; height: 80vh; border: none; border-radius: 8px; background: #000;
+    }
+
+    .status-toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #1e293b; color: #fff; padding: 12px 18px;
+      border-radius: 8px; font-size: 13px; display: none; z-index: 120;
+      box-shadow: 0 10px 15px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>📁 Kokurikuler BBC Karawang 2026</h1>
+    <span id="syncStatus">Data Lokal Siap</span>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="Cari guru / kelas (mis. Mr. Danu)..." oninput="renderFolders()" />
+    <select id="teacherFilter" onchange="renderFolders()">
+      <option value="">Semua Teacher</option>
+    </select>
+    <button id="btnSettings" onclick="openSettingsModal()">⚙️ Koneksi Drive</button>
+    <button class="primary" onclick="syncFromSheets()">🔄 Sync Sheets</button>
+  </div>
+</header>
+
+<div class="breadcrumb-bar">
+  <div class="breadcrumb" id="breadcrumb">
+    <span class="link" onclick="goHome()">🏠 Folder Utama (Drive ID: 1U-aylj...gcwB)</span>
+  </div>
+  <div style="font-size: 12px; color: var(--muted);">
+    Klik folder untuk melihat jadwal, preview media & upload foto/video
+  </div>
+</div>
+
+<main id="appContainer"></main>
+
+<!-- Modal Rename Folder -->
+<div class="modal-backdrop" id="renameModal">
+  <div class="modal">
+    <h3>✏️ Ubah Nama Folder</h3>
+    <p style="font-size:13px; color:var(--muted); margin:0;">Format disarankan: <b>Nama Teacher - Kelas</b> agar berurutan otomatis.</p>
+    <input type="text" id="renameInput" />
+    <div class="modal-actions">
+      <button onclick="closeModal('renameModal')">Batal</button>
+      <button class="primary" onclick="confirmRename()">Simpan Nama</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pengaturan Web App URL -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <h3>⚙️ Pengaturan Google Drive & Sheets</h3>
+    <p style="font-size:12px; color:var(--muted); line-height:1.5;">
+      Folder Drive Tujuan: <b>1U-aylj7t4Jz_fFLUqphqGXr_NvTrgcwB</b><br/>
+      Jika dibuka sebagai file HTML lokal, tempel URL Web App Apps Script di bawah ini:
+    </p>
+    <input type="text" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/...../exec" />
+    <div class="modal-actions">
+      <button onclick="closeModal('settingsModal')">Tutup</button>
+      <button class="primary" onclick="saveSettings()">Simpan Koneksi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox Preview & Zoom Modal -->
+<div class="lightbox-backdrop" id="lightboxModal">
+  <div class="lightbox-header">
+    <div id="lightboxTitle" style="font-weight:600; font-size:14px;">Preview Media</div>
+    <div class="lightbox-controls">
+      <button id="btnZoomOut" onclick="adjustZoom(-0.25)">➖ Zoom Out</button>
+      <span id="zoomLabel" style="font-size:12px; min-width:45px; text-align:center;">100%</span>
+      <button id="btnZoomIn" onclick="adjustZoom(0.25)">➕ Zoom In</button>
+      <button id="btnZoomReset" onclick="resetZoom()">🔄 Reset</button>
+      <a id="btnOpenNewTab" href="#" target="_blank" style="text-decoration:none;">
+        <button>↗️ Buka Asli</button>
+      </a>
+      <button style="background:#ef4444; border-color:#ef4444;" onclick="closeLightbox()">✖ Tutup</button>
+    </div>
+  </div>
+  <div class="lightbox-stage" id="lightboxStage"></div>
+</div>
+
+<div class="status-toast" id="toast"></div>
+
+<script>
+const DEFAULT_FOLDERS = [
+  {"id":"T101","folderName":"Mr. Danu - BS1","teacher":"Mr. Danu","kelas":"BS1","kodeKelas":"K11","keterangan":"Kelompok R (New Class)","activities":[{"ko":"KO1","tanggal":"2026-08-21","materi":"Role Play"},{"ko":"KO2","tanggal":"2026-09-22","materi":"Role Play"},{"ko":"KO3","tanggal":"2026-10-23","materi":"Role Play"}]},
+  {"id":"T10","folderName":"Mr. Danu - DCT3","teacher":"Mr. Danu","kelas":"DCT3","kodeKelas":"K02","keterangan":"Kelompok R lanjutan PE2","activities":[{"ko":"KO1","tanggal":"2026-08-24","materi":"Debate"},{"ko":"KO2","tanggal":"2026-09-21","materi":"Debate"},{"ko":"KO3","tanggal":"2026-10-22","materi":"Debate"}]},
+  {"id":"T012","folderName":"Mr. Irfan - ADV2","teacher":"Mr. Irfan","kelas":"ADV2","kodeKelas":"L01","keterangan":"Kelompok A level terakhir","activities":[{"ko":"KO1","tanggal":"2026-04-15","materi":"Speech"},{"ko":"KO2","tanggal":"2026-05-22","materi":"Speech"},{"ko":"KO3","tanggal":"2026-06-19","materi":"Speech"},{"ko":"KO4","tanggal":"2026-07-10","materi":"Debate"},{"ko":"KO5","tanggal":"2026-07-15","materi":"Debate"}]},
+  {"id":"T011b","folderName":"Mr. Irfan - BS1","teacher":"Mr. Irfan","kelas":"BS1","kodeKelas":"K02","keterangan":"Kelompok R lanjutan DCT3","activities":[{"ko":"KO1","tanggal":"2026-11-19","materi":"Role Play"}]},
+  {"id":"T011a","folderName":"Mr. Irfan - DCT3","teacher":"Mr. Irfan","kelas":"DCT3","kodeKelas":"K02","keterangan":"Kelompok R lanjutan PE2","activities":[{"ko":"KO1","tanggal":"2026-08-24","materi":"Debate"},{"ko":"KO2","tanggal":"2026-09-21","materi":"Debate"},{"ko":"KO3","tanggal":"2026-10-22","materi":"Debate"}]},
+  {"id":"T013","folderName":"Mr. Irfan - ECP1","teacher":"Mr. Irfan","kelas":"ECP1","kodeKelas":"K12","keterangan":"Kelompok C","activities":[{"ko":"KO1","tanggal":"2026-05-21","materi":"Story Telling"},{"ko":"KO2","tanggal":"2026-06-25","materi":"Story Telling"},{"ko":"KO3","tanggal":"2026-07-23","materi":"Story Telling"}]},
+  {"id":"T08a","folderName":"Mr. Rendi - DCA2","teacher":"Mr. Rendi","kelas":"DCA2","kodeKelas":"K06","keterangan":"Kelompok D lanjutan DCA1","activities":[{"ko":"KO1","tanggal":"2026-04-23","materi":"News Reading"},{"ko":"KO2","tanggal":"2026-05-21","materi":"News Reading"},{"ko":"KO3","tanggal":"2026-06-18","materi":"MC"}]},
+  {"id":"T08b","folderName":"Mr. Rendi - INT1","teacher":"Mr. Rendi","kelas":"INT1","kodeKelas":"K06","keterangan":"Kelompok D lanjutan DCA2","activities":[{"ko":"KO1","tanggal":"2026-07-16","materi":"Speech"},{"ko":"KO2","tanggal":"2026-08-20","materi":"Speech"},{"ko":"KO3","tanggal":"2026-09-17","materi":"Speech"}]},
+  {"id":"T08c","folderName":"Mr. Rendi - INT2","teacher":"Mr. Rendi","kelas":"INT2","kodeKelas":"K06","keterangan":"Kelompok D lanjutan INT1","activities":[{"ko":"KO1","tanggal":"2026-10-22","materi":"Debate"},{"ko":"KO2","tanggal":"2026-11-19","materi":"Debate"},{"ko":"KO3","tanggal":"2026-12-17","materi":"Debate"}]},
+  {"id":"T09a","folderName":"Mr. Ridwan - BE1","teacher":"Mr. Ridwan","kelas":"BE1","kodeKelas":"K03","keterangan":"Kelompok R lanjutan DCT1","activities":[{"ko":"KO1","tanggal":"2026-06-18","materi":"Story Telling"},{"ko":"KO2","tanggal":"2026-08-06","materi":"Story Telling"},{"ko":"KO3","tanggal":"2026-08-20","materi":"Story Telling"}]},
+  {"id":"T09b","folderName":"Mr. Ridwan - BE2","teacher":"Mr. Ridwan","kelas":"BE2","kodeKelas":"K03","keterangan":"Kelompok R lanjutan BE1","activities":[{"ko":"KO1","tanggal":"2026-09-21","materi":"Speech"},{"ko":"KO2","tanggal":"2026-10-22","materi":"Speech"},{"ko":"KO3","tanggal":"2026-11-23","materi":"Speech"}]},
+  {"id":"T091a","folderName":"Mr. Ridwan - PC2A","teacher":"Mr. Ridwan","kelas":"PC2A","kodeKelas":"K10","keterangan":"Kelompok A","activities":[{"ko":"KO1","tanggal":"2026-04-24","materi":"Describing Pictures"},{"ko":"KO2","tanggal":"2026-05-22","materi":"Describing Pictures"},{"ko":"KO3","tanggal":"2026-06-19","materi":"Describing Pictures"},{"ko":"KO4","tanggal":"2026-07-21","materi":"Describing Pictures"},{"ko":"KO5","tanggal":"2026-07-24","materi":"Describing Pictures"}]},
+  {"id":"T091b","folderName":"Mr. Ridwan - PC2B","teacher":"Mr. Ridwan","kelas":"PC2B","kodeKelas":"K10","keterangan":"Kelompok A lanjutan PC2A","activities":[{"ko":"KO1","tanggal":"2026-08-18","materi":"Role Play"},{"ko":"KO2","tanggal":"2026-09-18","materi":"Role Play"},{"ko":"KO3","tanggal":"2026-11-03","materi":"Role Play"},{"ko":"KO4","tanggal":"2026-11-13","materi":"Role Play"},{"ko":"KO5","tanggal":"2026-11-17","materi":"Role Play"}]},
+  {"id":"T02a","folderName":"Ms. Endah - DCA1","teacher":"Ms. Endah","kelas":"DCA1","kodeKelas":"K04","keterangan":"Kelompok D lanjutan BS2","activities":[{"ko":"KO1","tanggal":"2026-07-16","materi":"Speech"},{"ko":"KO2","tanggal":"2026-08-20","materi":"Speech"},{"ko":"KO3","tanggal":"2026-09-17","materi":"Speech"}]},
+  {"id":"T02b","folderName":"Ms. Endah - EL1","teacher":"Ms. Endah","kelas":"EL1","kodeKelas":"K04","keterangan":"Kelompok D lanjutan DCA1","activities":[{"ko":"KO1","tanggal":"2026-10-22","materi":"Debate"},{"ko":"KO2","tanggal":"2026-11-19","materi":"Debate"},{"ko":"KO3","tanggal":"2026-12-17","materi":"Debate"}]},
+  {"id":"T021a","folderName":"Ms. Endah - PC3B","teacher":"Ms. Endah","kelas":"PC3B","kodeKelas":"K08","keterangan":"Kelompok A","activities":[{"ko":"KO1","tanggal":"2026-04-28","materi":"Story Telling"},{"ko":"KO2","tanggal":"2026-05-26","materi":"Story Telling"},{"ko":"KO3","tanggal":"2026-06-29","materi":"Story Telling"},{"ko":"KO4","tanggal":"2026-07-24","materi":"Story Telling"},{"ko":"KO5","tanggal":"2026-07-28","materi":"Story Telling"}]},
+  {"id":"T021b","folderName":"Ms. Endah - PC4A","teacher":"Ms. Endah","kelas":"PC4A","kodeKelas":"K08","keterangan":"Kelompok A lanjutan PC3B","activities":[{"ko":"KO1","tanggal":"2026-08-18","materi":"News Reading"},{"ko":"KO2","tanggal":"2026-09-14","materi":"News Reading"},{"ko":"KO3","tanggal":"2026-10-20","materi":"News Reading"},{"ko":"KO4","tanggal":"2026-11-13","materi":"MC"},{"ko":"KO5","tanggal":"2026-11-17","materi":"MC"}]},
+  {"id":"T031","folderName":"Ms. Fitri - DCC2","teacher":"Ms. Fitri","kelas":"DCC2","kodeKelas":"K09","keterangan":"Kelompok A","activities":[{"ko":"KO1","tanggal":"2026-04-28","materi":"Role Play"},{"ko":"KO2","tanggal":"2026-05-26","materi":"Role Play"},{"ko":"KO3","tanggal":"2026-07-03","materi":"Role Play"},{"ko":"KO4","tanggal":"2026-07-28","materi":"News Reading"},{"ko":"KO5","tanggal":"2026-07-31","materi":"News Reading"}]},
+  {"id":"T03","folderName":"Ms. Fitri - PE2","teacher":"Ms. Fitri","kelas":"PE2","kodeKelas":"K02","keterangan":"Kelompok R lanjutan PE1","activities":[{"ko":"KO1","tanggal":"2026-05-25","materi":"News Reading"},{"ko":"KO2","tanggal":"2026-06-26","materi":"News Reading"},{"ko":"KO3","tanggal":"2026-07-27","materi":"MC"}]},
+  {"id":"T042a","folderName":"Ms. Lina - PB1","teacher":"Ms. Lina","kelas":"PB1","kodeKelas":"K05","keterangan":"Kelompok R lanjutan DCC3","activities":[{"ko":"KO1","tanggal":"2026-06-18","materi":"Describing Pictures"},{"ko":"KO2","tanggal":"2026-07-20","materi":"Describing Pictures"},{"ko":"KO3","tanggal":"2026-08-20","materi":"Describing Pictures"}]},
+  {"id":"T042b","folderName":"Ms. Lina - PB2","teacher":"Ms. Lina","kelas":"PB2","kodeKelas":"K05","keterangan":"Kelompok R lanjutan PB1","activities":[{"ko":"KO1","tanggal":"2026-09-17","materi":"Story Telling"},{"ko":"KO2","tanggal":"2026-10-19","materi":"Story Telling"},{"ko":"KO3","tanggal":"2026-11-16","materi":"Story Telling"}]},
+  {"id":"T043a","folderName":"Ms. Lina - PC1A","teacher":"Ms. Lina","kelas":"PC1A","kodeKelas":"K16","keterangan":"Kelompok A","activities":[{"ko":"KO1","tanggal":"2026-04-28","materi":"Describing Pictures"},{"ko":"KO2","tanggal":"2026-05-26","materi":"Describing Pictures"},{"ko":"KO3","tanggal":"2026-06-29","materi":"Describing Pictures"},{"ko":"KO4","tanggal":"2026-07-24","materi":"Describing Pictures"},{"ko":"KO5","tanggal":"2026-07-28","materi":"Describing Pictures"}]},
+  {"id":"T043b","folderName":"Ms. Lina - PC1B","teacher":"Ms. Lina","kelas":"PC1B","kodeKelas":"K16","keterangan":"Kelompok A lanjutan PC1A","activities":[{"ko":"KO1","tanggal":"2026-08-18","materi":"Role Play"},{"ko":"KO2","tanggal":"2026-09-14","materi":"Role Play"},{"ko":"KO3","tanggal":"2026-10-20","materi":"Role Play"},{"ko":"KO4","tanggal":"2026-11-13","materi":"Role Play"},{"ko":"KO5","tanggal":"2026-11-17","materi":"Role Play"}]},
+  {"id":"T07","folderName":"Ms. Rika - PC6A","teacher":"Ms. Rika","kelas":"PC6A","kodeKelas":"K09","keterangan":"Kelompok A lanjutan DCC2","activities":[{"ko":"KO1","tanggal":"2026-08-25","materi":"MC"},{"ko":"KO2","tanggal":"2026-10-09","materi":"Speech"},{"ko":"KO3","tanggal":"2026-10-27","materi":"Speech"},{"ko":"KO4","tanggal":"2026-11-17","materi":"Debate"},{"ko":"KO5","tanggal":"2026-11-24","materi":"Debate"}]},
+  {"id":"T052a","folderName":"Ms. Syifa - DCC2","teacher":"Ms. Syifa","kelas":"DCC2","kodeKelas":"K07","keterangan":"Kelompok A","activities":[{"ko":"KO1","tanggal":"2026-05-19","materi":"Role Play"},{"ko":"KO2","tanggal":"2026-06-23","materi":"Role Play"},{"ko":"KO3","tanggal":"2026-07-24","materi":"Role Play"},{"ko":"KO4","tanggal":"2026-08-14","materi":"News Reading"},{"ko":"KO5","tanggal":"2026-08-18","materi":"News Reading"}]},
+  {"id":"T05a","folderName":"Ms. Syifa - PB1","teacher":"Ms. Syifa","kelas":"PB1","kodeKelas":"K01","keterangan":"Kelompok R lanjutan DCC3","activities":[{"ko":"KO1","tanggal":"2026-06-18","materi":"Describing Pictures"},{"ko":"KO2","tanggal":"2026-07-20","materi":"Describing Pictures"},{"ko":"KO3","tanggal":"2026-08-20","materi":"Describing Pictures"}]},
+  {"id":"T05b","folderName":"Ms. Syifa - PB2","teacher":"Ms. Syifa","kelas":"PB2","kodeKelas":"K01","keterangan":"Kelompok R lanjutan PB1","activities":[{"ko":"KO1","tanggal":"2026-09-17","materi":"Story Telling"},{"ko":"KO2","tanggal":"2026-10-19","materi":"Story Telling"},{"ko":"KO3","tanggal":"2026-11-16","materi":"Story Telling"}]},
+  {"id":"T052b","folderName":"Ms. Syifa - PC6A","teacher":"Ms. Syifa","kelas":"PC6A","kodeKelas":"K07","keterangan":"Kelompok A lanjutan DCC2","activities":[{"ko":"KO1","tanggal":"2026-09-18","materi":"MC"},{"ko":"KO2","tanggal":"2026-10-16","materi":"Speech"},{"ko":"KO3","tanggal":"2026-11-20","materi":"Speech"},{"ko":"KO4","tanggal":"2026-12-15","materi":"Debate"},{"ko":"KO5","tanggal":"2026-12-18","materi":"Debate"}]}
+];
+
+// Deteksi otomatis apakah berjalan di dalam Google Apps Script atau Standalone HTML
+const IS_GAS_ENV = (typeof google !== 'undefined' && google.script && google.script.run);
+
+let folders = JSON.parse(localStorage.getItem('bbc_cocur_folders')) || DEFAULT_FOLDERS;
+let webAppUrl = localStorage.getItem('bbc_webapp_url') || '';
+let currentFolderId = null;
+let renamingFolderId = null;
+let uploadQueue = [];
+
+// State Lightbox Zoom & Pan
+let currentZoom = 1;
+let panX = 0, panY = 0;
+let isDragging = false, startX = 0, startY = 0;
+
+function init() {
+  populateTeacherFilter();
+  renderFolders();
+  if (IS_GAS_ENV) {
+    document.getElementById('syncStatus').textContent = 'Terhubung Langsung (Apps Script)';
+    document.getElementById('btnSettings').style.display = 'none';
+    syncFromSheets();
+  } else if (webAppUrl) {
+    document.getElementById('syncStatus').textContent = 'Terhubung ke Drive';
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+function populateTeacherFilter() {
+  const select = document.getElementById('teacherFilter');
+  const teachers = [...new Set(folders.map(f => f.teacher))].sort();
+  select.innerHTML = '<option value="">Semua Teacher (' + teachers.length + ')</option>';
+  teachers.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    select.appendChild(opt);
+  });
+}
+
+function goHome() {
+  currentFolderId = null;
+  uploadQueue = [];
+  document.getElementById('breadcrumb').innerHTML = `<span class="link" onclick="goHome()">🏠 Folder Utama (Drive ID: 1U-aylj...gcwB)</span>`;
+  renderFolders();
+}
+
+function renderFolders() {
+  if (currentFolderId) return;
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const teacherFilter = document.getElementById('teacherFilter').value;
+
+  const filtered = folders
+    .filter(f => (!teacherFilter || f.teacher === teacherFilter))
+    .filter(f => f.folderName.toLowerCase().includes(query) || f.id.toLowerCase().includes(query))
+    .sort((a, b) => a.folderName.localeCompare(b.folderName));
+
+  const container = document.getElementById('appContainer');
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="card" style="text-align:center; padding:40px;">Tidak ada folder yang cocok dengan pencarian.</div>`;
+    return;
+  }
+
+  let html = `<div class="folder-grid">`;
+  filtered.forEach(f => {
+    html += `
+      <div class="folder-item" onclick="openFolder('${f.id}')">
+        <button class="rename-btn" title="Rename Folder" onclick="event.stopPropagation(); openRenameModal('${f.id}')">✏️ Rename</button>
+        <div class="folder-icon">
+          <div class="folder-tab"></div>
+          <div class="folder-body">
+            <span class="folder-badge">${f.activities.length} KO</span>
+          </div>
+        </div>
+        <div class="folder-name">${f.folderName}</div>
+        <div class="folder-sub">ID: ${f.id} • ${f.kodeKelas}</div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function openFolder(id) {
+  currentFolderId = id;
+  uploadQueue = [];
+  const folder = folders.find(f => f.id === id);
+  if (!folder) return;
+
+  document.getElementById('breadcrumb').innerHTML = `
+    <span class="link" onclick="goHome()">🏠 Folder Utama</span>
+    <span>/</span>
+    <b>📁 ${folder.folderName}</b>
+  `;
+
+  const container = document.getElementById('appContainer');
+  let activityRows = folder.activities.map(act => `
+    <tr>
+      <td><span class="ko-pill">${act.ko}</span></td>
+      <td>${act.tanggal}</td>
+      <td><b>${act.materi}</b></td>
+    </tr>
+  `).join('');
+
+  let koOptions = folder.activities.map(act => `
+    <option value="${act.ko}_${act.materi}">${act.ko} - ${act.materi} (${act.tanggal})</option>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="detail-layout">
+      <div class="card">
+        <h2>
+          <span>📋 Detail Kokurikuler: ${folder.folderName}</span>
+          <button onclick="openRenameModal('${folder.id}')">✏️ Rename Folder</button>
+        </h2>
+        <p style="font-size:12px; color:var(--muted); margin-top:-6px;">
+          ID Jadwal: <b>${folder.id}</b> | Kode Kelas: <b>${folder.kodeKelas}</b> | ${folder.keterangan}
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Sesi</th>
+              <th>Tanggal Kegiatan</th>
+              <th>Materi / Keterangan Harian</th>
+            </tr>
+          </thead>
+          <tbody>${activityRows}</tbody>
+        </table>
+
+        <div style="margin-top: 22px;">
+          <h2>
+            <span>☁️ File Tersimpan di Drive (Klik untuk Preview & Zoom)</span>
+            <button onclick="loadDriveFiles('${folder.folderName}')">🔄 Muat Ulang</button>
+          </h2>
+          <div id="driveFilesArea" class="file-grid">
+            <div style="grid-column:1/-1; font-size:12px; color:var(--muted);">
+              ${(IS_GAS_ENV || webAppUrl) ? 'Memuat daftar file dari Google Drive...' : 'Hubungkan URL Google Apps Script di menu ⚙️ untuk melihat & menyimpan file ke Drive.'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📤 Upload Dokumentasi Foto & Video</h2>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Pilih Sesi Kegiatan (Nama File Otomatis Terlabeli):</label>
+          <select id="koSelect" style="width:100%;">
+            ${koOptions}
+            <option value="Umum">Dokumentasi Umum Kelas</option>
+          </select>
+        </div>
+
+        <div class="compress-options">
+          <label>
+            <input type="checkbox" id="autoCompressImg" checked />
+            Auto-Kompres Foto (&le; 200 KB)
+          </label>
+          <label>
+            <input type="checkbox" id="autoCompressVid" checked />
+            Kompres Video (720p WebM)
+          </label>
+        </div>
+
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <div style="font-size:28px;">📸 🎥</div>
+          <p><b>Klik untuk pilih Foto atau Video</b>, atau seret file ke sini</p>
+          <p style="font-size:11px;">Foto 5MB+ otomatis dikompres ke ~180KB • Klik thumbnail untuk Preview & Zoom sebelum upload</p>
+          <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display:none" onchange="handleFiles(this.files)" />
+        </div>
+
+        <div class="queue-list" id="queueList"></div>
+
+        <div style="margin-top:14px; display:flex; justify-content:flex-end; gap:8px;">
+          <button class="success" id="uploadBtn" style="display:none;" onclick="uploadAllToDrive()">🚀 Upload ke Folder "${folder.folderName}"</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  setupDragDrop();
+  if (IS_GAS_ENV || webAppUrl) loadDriveFiles(folder.folderName);
+}
+
+function setupDragDrop() {
+  const dz = document.getElementById('dropzone');
+  if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+}
+
+// ==========================================
+// LIGHTBOX PREVIEW & ZOOM ENGINE
+// ==========================================
+function openLightbox({ title, type, src, openUrl }) {
+  const modal = document.getElementById('lightboxModal');
+  const stage = document.getElementById('lightboxStage');
+  document.getElementById('lightboxTitle').textContent = title;
+  document.getElementById('btnOpenNewTab').href = openUrl || src;
+
+  resetZoom();
+  const isImage = type.startsWith('image/');
+  document.getElementById('btnZoomIn').style.display = isImage ? 'inline-flex' : 'none';
+  document.getElementById('btnZoomOut').style.display = isImage ? 'inline-flex' : 'none';
+  document.getElementById('btnZoomReset').style.display = isImage ? 'inline-flex' : 'none';
+  document.getElementById('zoomLabel').style.display = isImage ? 'inline-block' : 'none';
+
+  if (isImage) {
+    stage.innerHTML = `<img id="lightboxImg" src="${src}" alt="${title}" />`;
+    setupImageZoomPan();
+  } else if (src.includes('drive.google.com')) {
+    stage.innerHTML = `<iframe src="${src}" allow="autoplay"></iframe>`;
+  } else {
+    stage.innerHTML = `<video src="${src}" controls autoplay></video>`;
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeLightbox() {
+  document.getElementById('lightboxModal').style.display = 'none';
+  document.getElementById('lightboxStage').innerHTML = '';
+}
+
+function adjustZoom(delta) {
+  currentZoom = Math.min(5, Math.max(0.5, currentZoom + delta));
+  applyTransform();
+}
+
+function resetZoom() {
+  currentZoom = 1;
+  panX = 0;
+  panY = 0;
+  applyTransform();
+}
+
+function applyTransform() {
+  const img = document.getElementById('lightboxImg');
+  document.getElementById('zoomLabel').textContent = Math.round(currentZoom * 100) + '%';
+  if (img) {
+    img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+  }
+}
+
+function setupImageZoomPan() {
+  const stage = document.getElementById('lightboxStage');
+  stage.onwheel = (e) => {
+    e.preventDefault();
+    adjustZoom(e.deltaY < 0 ? 0.2 : -0.2);
+  };
+  stage.onmousedown = (e) => {
+    if (currentZoom <= 1) return;
+    isDragging = true;
+    startX = e.clientX - panX;
+    startY = e.clientY - panY;
+  };
+  window.onmousemove = (e) => {
+    if (!isDragging) return;
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    applyTransform();
+  };
+  window.onmouseup = () => { isDragging = false; };
+}
+
+// ==========================================
+// ENGINE KOMPRESI FOTO & VIDEO
+// ==========================================
+async function compressImageToTarget(file, targetKB = 200) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width, height = img.height;
+        const MAX_DIM = 1440;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) { height = Math.round((height * MAX_DIM) / width); width = MAX_DIM; }
+          else { width = Math.round((width * MAX_DIM) / height); height = MAX_DIM; }
+        }
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let quality = 0.85;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        let sizeKB = Math.round((dataUrl.length * 3) / 4 / 1024);
+
+        while (sizeKB > targetKB && quality > 0.25) {
+          quality -= 0.08;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+          sizeKB = Math.round((dataUrl.length * 3) / 4 / 1024);
+        }
+        if (sizeKB > targetKB) {
+          canvas.width = Math.round(width * 0.8);
+          canvas.height = Math.round(height * 0.8);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+          sizeKB = Math.round((dataUrl.length * 3) / 4 / 1024);
+        }
+
+        resolve({
+          name: file.name.replace(/\.[^/.]+$/, '') + '.jpg',
+          mimeType: 'image/jpeg',
+          dataUrl: dataUrl,
+          base64: dataUrl.split(',')[1],
+          originalSize: file.size,
+          compressedSize: sizeKB * 1024
+        });
+      };
+    };
+  });
+}
+
+async function compressVideo(file) {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(file);
+    video.muted = true;
+    video.playsInline = true;
+
+    video.onloadedmetadata = () => {
+      const MAX_W = 854;
+      const scale = Math.min(1, MAX_W / video.videoWidth);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(video.videoWidth * scale);
+      canvas.height = Math.round(video.videoHeight * scale);
+      const ctx = canvas.getContext('2d');
+
+      const stream = canvas.captureStream(24);
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 1200000 });
+
+      const chunks = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const blobUrl = URL.createObjectURL(blob);
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          resolve({
+            name: file.name.replace(/\.[^/.]+$/, '') + '.webm',
+            mimeType: 'video/webm',
+            dataUrl: blobUrl,
+            base64: reader.result.split(',')[1],
+            originalSize: file.size,
+            compressedSize: blob.size
+          });
+        };
+      };
+
+      recorder.start();
+      video.play();
+      function drawFrame() {
+        if (video.paused || video.ended) { recorder.stop(); return; }
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        requestAnimationFrame(drawFrame);
+      }
+      drawFrame();
+    };
+  });
+}
+
+function fileToBase64Raw(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      resolve({
+        name: file.name,
+        mimeType: file.type,
+        dataUrl: reader.result,
+        base64: reader.result.split(',')[1],
+        originalSize: file.size,
+        compressedSize: file.size
+      });
+    };
+  });
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+async function handleFiles(fileList) {
+  const doImg = document.getElementById('autoCompressImg').checked;
+  const doVid = document.getElementById('autoCompressVid').checked;
+  const qList = document.getElementById('queueList');
+
+  for (const file of fileList) {
+    const tempId = 'q_' + Math.random().toString(36).slice(2, 8);
+    qList.insertAdjacentHTML('beforeend', `
+      <div class="queue-item" id="${tempId}">
+        <span>⏳ Memproses <b>${file.name}</b> (${formatBytes(file.size)})...</span>
+      </div>
+    `);
+
+    let processed;
+    if (file.type.startsWith('image/') && doImg) processed = await compressImageToTarget(file, 200);
+    else if (file.type.startsWith('video/') && doVid) processed = await compressVideo(file);
+    else processed = await fileToBase64Raw(file);
+
+    const idx = uploadQueue.push(processed) - 1;
+    const isImg = processed.mimeType.startsWith('image/');
+
+    document.getElementById(tempId).innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px;">
+        ${isImg
+          ? `<img class="queue-thumb" src="${processed.dataUrl}" onclick="previewQueueItem(${idx})" title="Klik untuk Preview & Zoom" />`
+          : `<div class="queue-thumb" style="display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;" onclick="previewQueueItem(${idx})">🎬</div>`
+        }
+        <div>
+          <b>${processed.name}</b><br/>
+          <span style="color:var(--muted)">Asli: ${formatBytes(processed.originalSize)}</span>
+          &rarr; <span class="size-badge">${formatBytes(processed.compressedSize)}</span>
+        </div>
+      </div>
+      <button onclick="previewQueueItem(${idx})">🔍 Preview</button>
+    `;
+  }
+
+  if (uploadQueue.length > 0) document.getElementById('uploadBtn').style.display = 'inline-flex';
+}
+
+function previewQueueItem(idx) {
+  const item = uploadQueue[idx];
+  if (!item) return;
+  openLightbox({ title: item.name, type: item.mimeType, src: item.dataUrl });
+}
+
+// ==========================================
+// KOMUNIKASI BACKEND (GAS NATIVE ATAU FETCH)
+// ==========================================
+async function uploadAllToDrive() {
+  if (!IS_GAS_ENV && !webAppUrl) {
+    openSettingsModal();
+    showToast('Masukkan URL Google Apps Script terlebih dahulu!');
+    return;
+  }
+
+  const folder = folders.find(f => f.id === currentFolderId);
+  const koTag = document.getElementById('koSelect').value;
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Mengunggah ke Drive...';
+
+  let successCount = 0;
+  for (const item of uploadQueue) {
+    try {
+      if (IS_GAS_ENV) {
+        await new Promise((res, rej) => {
+          google.script.run
+            .withSuccessHandler(() => { successCount++; res(); })
+            .withFailureHandler(rej)
+            .uploadToDrive(folder.folderName, koTag, item.name, item.mimeType, item.base64);
+        });
+      } else {
+        const resp = await fetch(webAppUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'upload',
+            folderName: folder.folderName,
+            koTag: koTag,
+            fileName: item.name,
+            mimeType: item.mimeType,
+            base64Data: item.base64
+          })
+        });
+        const res = await resp.json();
+        if (res.status === 'success') successCount++;
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  showToast(`Berhasil mengunggah ${successCount} dari ${uploadQueue.length} file ke Drive!`);
+  uploadQueue = [];
+  document.getElementById('queueList').innerHTML = '';
+  btn.style.display = 'none';
+  btn.disabled = false;
+  btn.textContent = `🚀 Upload ke Folder "${folder.folderName}"`;
+  loadDriveFiles(folder.folderName);
+}
+
+let currentDriveFiles = [];
+
+async function loadDriveFiles(folderName) {
+  if (!IS_GAS_ENV && !webAppUrl) return;
+  const area = document.getElementById('driveFilesArea');
+  area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--muted);">⏳ Mengambil isi folder dari Google Drive...</div>`;
+
+  try {
+    let data;
+    if (IS_GAS_ENV) {
+      data = await new Promise((res, rej) => {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej).listDriveFiles(folderName);
+      });
+    } else {
+      const resp = await fetch(`${webAppUrl}?action=listFiles&folderName=${encodeURIComponent(folderName)}`);
+      data = await resp.json();
+    }
+
+    currentDriveFiles = data.files || [];
+    if (currentDriveFiles.length === 0) {
+      area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--muted);">Folder ini masih kosong di Google Drive.</div>`;
+      return;
+    }
+
+    area.innerHTML = currentDriveFiles.map((f, idx) => {
+      const isImg = f.mimeType.startsWith('image/');
+      return `
+        <div class="file-card" onclick="previewDriveFile(${idx})" title="Klik untuk Preview & Zoom">
+          ${isImg
+            ? `<img class="file-thumb" src="${f.previewUrl}" loading="lazy" />`
+            : `<div class="file-thumb">🎬</div>`
+          }
+          <span class="file-title">${f.name}</span>
+          <div style="color:var(--muted); margin-top:4px;">${formatBytes(f.size)}</div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    area.innerHTML = `<div style="grid-column:1/-1; font-size:12px; color:var(--danger);">Gagal memuat file Drive.</div>`;
+  }
+}
+
+function previewDriveFile(idx) {
+  const f = currentDriveFiles[idx];
+  if (!f) return;
+  const isImg = f.mimeType.startsWith('image/');
+  openLightbox({
+    title: f.name,
+    type: f.mimeType,
+    src: isImg ? f.previewUrl : f.embedUrl,
+    openUrl: f.url
+  });
+}
+
+async function syncFromSheets() {
+  if (!IS_GAS_ENV && !webAppUrl) {
+    openSettingsModal();
+    showToast('Masukkan URL Apps Script untuk sinkronisasi dengan Google Sheets.');
+    return;
+  }
+  showToast('Menyinkronkan data dari Google Sheets...');
+  try {
+    let data;
+    if (IS_GAS_ENV) {
+      data = await new Promise((res, rej) => {
+        google.script.run.withSuccessHandler(res).withFailureHandler(rej).getCoCurricularFoldersData();
+      });
+    } else {
+      const resp = await fetch(`${webAppUrl}?action=getData`);
+      data = await resp.json();
+    }
+
+    if (data.status === 'success' && data.folders.length > 0) {
+      folders = data.folders;
+      localStorage.setItem('bbc_cocur_folders', JSON.stringify(folders));
+      populateTeacherFilter();
+      if (currentFolderId) openFolder(currentFolderId);
+      else renderFolders();
+      showToast('Data berhasil disinkronkan dari Google Sheets!');
+    }
+  } catch (e) {
+    showToast('Gagal sinkronisasi data.');
+  }
+}
+
+function openRenameModal(id) {
+  renamingFolderId = id;
+  const folder = folders.find(f => f.id === id);
+  document.getElementById('renameInput').value = folder.folderName;
+  document.getElementById('renameModal').style.display = 'flex';
+}
+
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+async function confirmRename() {
+  const newName = document.getElementById('renameInput').value.trim();
+  if (!newName) return;
+
+  const folder = folders.find(f => f.id === renamingFolderId);
+  const oldName = folder.folderName;
+  folder.folderName = newName;
+  localStorage.setItem('bbc_cocur_folders', JSON.stringify(folders));
+
+  closeModal('renameModal');
+  if (currentFolderId === renamingFolderId) openFolder(currentFolderId);
+  else renderFolders();
+
+  if (oldName !== newName) {
+    if (IS_GAS_ENV) {
+      google.script.run.renameDriveFolder(oldName, newName);
+    } else if (webAppUrl) {
+      fetch(webAppUrl, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'renameFolder', oldName, newName })
+      }).catch(() => {});
+    }
+  }
+  showToast(`Nama folder diubah menjadi "${newName}"`);
+}
+
+function openSettingsModal() {
+  document.getElementById('webAppUrlInput').value = webAppUrl;
+  document.getElementById('settingsModal').style.display = 'flex';
+}
+
+function saveSettings() {
+  webAppUrl = document.getElementById('webAppUrlInput').value.trim();
+  localStorage.setItem('bbc_webapp_url', webAppUrl);
+  document.getElementById('syncStatus').textContent = webAppUrl ? 'Terhubung ke Drive' : 'Data Lokal Siap';
+  closeModal('settingsModal');
+  showToast('Pengaturan koneksi berhasil disimpan!');
+}
+
+init();
+</script>
+</body>
+</html>
